@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/Xaxis/peer-sock/issues"
   },
-  "homepage": "https://github.com/Xaxis/peer-sock#readme"
+  "homepage": "https://github.com/Xaxis/peer-sock#readme",
+  "dependencies": {
+    "express": "^4.13.3",
+    "lodash": "^3.10.1",
+    "nodemon": "^1.4.1",
+    "socket.io": "^1.3.6"
+  }
 }
