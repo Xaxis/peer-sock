@@ -64,6 +64,7 @@ io.sockets.on('connection', function(socket) {
       target_peer   = null,
       handler       = messageObject.handler_id;
 
+    // Send message to peer
     if (messageObject.peer_id in hosts) {
       target_peer = hosts[messageObject.peer_id].socket;
       target_peer.emit(handler, _.extend(messageObject, {

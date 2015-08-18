@@ -1,7 +1,7 @@
 {
   "name": "peer-sock",
   "version": "1.0.0",
-  "description": "Scaffolding for rapidly building node/backbone based web applications.",
+  "description": "WebRTC and socket.io framework for easily managing p2p data channel communications.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -1,4 +1,19 @@
-var PeerSock = function peerSock(options) {
+/**
+ * PeerSock is a library for WebRTC data channel management.
+ * See documentation: https://github.com/Xaxis/peer-sock
+ *
+ * @param options {Object}
+ * @param options.debug {Boolean}               Debugging flag
+ * @param options.rtc_config {Object}           Peer connection configuration
+ * @param options.rtc_options {Object}          Peer connection options
+ * @param options.rtc_handlers {Object}         Peer connection event handlers
+ * @param options.dc_config {Object}            Data channel configuration
+ * @param options.dc_handlers {Object}          Data channel event handlers
+ * @param options.signal {Object}               Signaling channel interface
+ * @param options.errorHandler {Function}       Generic error handler
+ * @returns {*|Object|void}
+ */
+var PeerSock = function peerSock( options ) {
   options = options || {};
   return Object.assign(Object.create({}), {
 
@@ -147,8 +162,9 @@ var PeerSock = function peerSock(options) {
     },
 
     /**
+     * Generic overridable error handler.
      *
-     * @param err {String}
+     * @param err {String}        Message to log
      */
     errorHandler: options.errorHandler || function( err ) {
       console.log(err);
@@ -350,16 +366,16 @@ var PeerSock = function peerSock(options) {
      * messages sent back.
      *
      * @param options {Object}
-     * @param options.channel_id {String}
-     * @param options.client_id {String}
-     * @param options.peer_id {String}
+     * @param options.channel_id {String}       The channel id to use to create data channel
+     * @param options.client_id {String}        Socket id of the client
+     * @param options.peer_id {String}          Socket id of the peer
      */
     startListeningChannel: function( options ) {
       var
         self        = this,
         init        = this.pc ? true : false,
         identity    = function() {},
-        onOpen      = options.onOpen || identity,
+        onOpen      = options.onOpen || options.send || identity,
         onMessage   = options.onMessage || identity,
         onClose     = options.onClose || identity,
         onError     = options.onError || identity;
@@ -413,6 +429,5 @@ var PeerSock = function peerSock(options) {
         });
       }
     }
-
   });
 };
