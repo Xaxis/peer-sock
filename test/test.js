@@ -21,7 +21,7 @@
       onMessage: function(c) {
         console.log(c.data);
 
-        // Send message back to peer
+        // Send message back after receiving message
         c.channel.send(JSON.stringify({
           msg: 'Hello Peer YOURSELF!'
         }));
@@ -32,7 +32,7 @@
     socket.on('peer', function( peer ) {
       if (self.client_id != peer.peer_id) {
 
-        // ...
+        // Send first message to peer and listen for responses
         PS.startListeningChannel({
           channel_id: 'channel_1',
           client_id: self.client_id,

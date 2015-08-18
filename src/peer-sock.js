@@ -1,8 +1,14 @@
 var PeerSock = function peerSock(options) {
   options = options || {};
   return Object.assign(Object.create({}), {
+
+    // PeerConnection object (one per PeerSock object)
     pc: null,
+
+    // Reference to created data channels
     channels: {},
+
+    // Debuf flag
     debug: options.debug || false,
 
     // Shims
@@ -19,15 +25,8 @@ var PeerSock = function peerSock(options) {
       ]
     },
 
-    // RTCOptions
+    // RTC Options
     rtc_options: options.rtc_options || {
-
-      // @TODO - Why do the below configuration options break file transfer in chrome to chrome?
-      // @TODO - Do both of the options break file transfer in chrome or just one or the other?
-      //optional: [
-      //  {DtlsSrtpKeyAgreement: true},
-      //  {RtpDataChannels: true}
-      //]
       optional: [
         {DtlsSrtpKeyAgreement: true}
       ]
@@ -42,7 +41,6 @@ var PeerSock = function peerSock(options) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.ondatachannel::', e);
       },
       onicecandidate: options.onicecandidate || function(e) {
-
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onicecandidate::', e);
         if (e.candidate == null) return;
         var
@@ -51,10 +49,8 @@ var PeerSock = function peerSock(options) {
           client_id     = this.PeerSock.client_id,
           peer_id       = this.PeerSock.peer_id;
 
-        // Listen for ice candidates from peer
+        // Listen for and then set ice candidates from peer
         this.PeerSock.signal.onmessage('PeerSock_IceCandidate', function( candidateMessage ) {
-
-          // Set ice candidate from peer
           self.PeerSock.pc.addIceCandidate(new self.PeerSock.IceCandidate(candidateMessage.message));
         });
 
@@ -216,7 +212,7 @@ var PeerSock = function peerSock(options) {
         }(),
 
         // Create data channel and store reference
-        channel         = pc.createDataChannel(id, this.dc_config);
+        channel         = this.channels[options.channel_id] = pc.createDataChannel(id, this.dc_config);
 
       // Extend default handlers
       for (var handler in this.dc_handlers) {
@@ -227,7 +223,17 @@ var PeerSock = function peerSock(options) {
       // Add PeerSock reference to data channel object
       channel.PeerSock = this;
 
-      return this.channels[options.channel_id] = channel;
+      return this.getDataChannel(options.channel_id);
+    },
+
+    /**
+     * Returns a data channel stored on the PeerSock.channels object.
+     *
+     * @param channel_id {String}       The channel name the channel was created with.
+     * @returns {*}
+     */
+    getDataChannel: function( channel_id ) {
+      return this.channels[channel_id];
     },
 
     /**
@@ -401,11 +407,11 @@ var PeerSock = function peerSock(options) {
       // Send connection offer to peer & reference socket ids
       this.client_id = options.client_id;
       this.peer_id = options.peer_id;
-      //if (!init) {
+      if (!init) {
         this.createClientOffer(this.pc, function(offer) {
           self.signal.send(options.channel_id, options.peer_id, options.client_id, offer);
         });
-      //}
+      }
     }
 
   });
