@@ -15,7 +15,6 @@
 
     // STEP 2: Initialize new peer connection w/ data channel
     PS.newListeningChannel({
-      client_id: self.client_id,
       channel_id: 'channel_1',
 
       // Handle message from peer
@@ -24,11 +23,11 @@
 
         // Send a message back
         c.channel.send(JSON.stringify({
-          msg: 'Hello Peer YOURSELF!'
+          msg: 'Hello YOURSELF!'
         }));
       }
     });
-    
+
     // Server notifies of new peers and sends their id
     socket.on('peer', function( peer ) {
       if (self.client_id != peer.peer_id) {
@@ -39,7 +38,7 @@
           client_id: self.client_id,
           peer_id: peer.peer_id,
 
-          // Send first message to peer
+          // Send message to peer
           send: function(c) {
 
             // Send first message to peer
