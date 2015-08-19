@@ -3,18 +3,22 @@
  * See documentation: https://github.com/Xaxis/peer-sock
  *
  * @param options {Object}
- * @param options.debug {Boolean}               Debugging flag
- * @param options.rtc_config {Object}           Peer connection configuration
- * @param options.rtc_options {Object}          Peer connection options
- * @param options.rtc_handlers {Object}         Peer connection event handlers
- * @param options.dc_config {Object}            Data channel configuration
- * @param options.dc_handlers {Object}          Data channel event handlers
- * @param options.signal {Object}               Signaling channel interface
- * @param options.errorHandler {Function}       Generic error handler
+ * @param options.debug {Boolean}                   Debugging flag
+ * @param options.rtc_config {Object}               Peer connection configuration
+ * @param options.rtc_options {Object}              Peer connection options
+ * @param options.rtc_handlers {Object}             Peer connection event handlers
+ * @param options.dc_config {Object}                Data channel configuration
+ * @param options.dc_handlers {Object}              Data channel event handlers
+ * @param options.signal.send {Function}            Signaling channel send method
+ * @param options.signal.onmessage {Function}       Signaling channel message listener
+ * @param options.errorHandler {Function}           Generic error handler
  * @returns {*|Object|void}
  */
 var PeerSock = function peerSock( options ) {
   options = options || {};
+  options.rtc_handlers = options.rtc_handlers || {};
+  options.dc_handlers = options.dc_handlers || {};
+  options.signal = options.signal || {};
   return Object.assign(Object.create({}), {
 
     // PeerConnection object (one per PeerSock object)
@@ -49,13 +53,13 @@ var PeerSock = function peerSock( options ) {
 
     // RTC Default Handlers
     rtc_handlers: {
-      onaddstream: options.onaddstream || function(e) {
+      onaddstream: options.rtc_handlers.onaddstream || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onaddstream::', e);
       },
-      ondatachannel: options.ondatachannel || function(e) {
+      ondatachannel: options.rtc_handlers.ondatachannel || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.ondatachannel::', e);
       },
-      onicecandidate: options.onicecandidate || function(e) {
+      onicecandidate: options.rtc_handlers.onicecandidate || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onicecandidate::', e);
         if (e.candidate == null) return;
         var
@@ -65,7 +69,7 @@ var PeerSock = function peerSock( options ) {
           peer_id       = this.PeerSock.peer_id;
 
         // Listen for and then set ice candidates from peer
-        this.PeerSock.signal.onmessage('PeerSock_IceCandidate', function( candidateMessage ) {
+        this.PeerSock.signal.onmessage('PeerSock_IceCandidate', function(candidateMessage) {
           self.PeerSock.pc.addIceCandidate(new self.PeerSock.IceCandidate(candidateMessage.message));
         });
 
@@ -78,28 +82,28 @@ var PeerSock = function peerSock( options ) {
         // Nullify handler
         this.onicecandidate = null;
       },
-      oniceconnectionstatechange: options.oniceconnectionstatechange || function(e) {
+      oniceconnectionstatechange: options.rtc_handlers.oniceconnectionstatechange || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.oniceconnectionstatechange::', e);
       },
-      onidentityresult: options.onidentityresult || function(e) {
+      onidentityresult: options.rtc_handlers.onidentityresult || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onidentityresult::', e);
       },
-      onidpassertionerror: options.onidpassertionerror || function(e) {
+      onidpassertionerror: options.rtc_handlers.onidpassertionerror || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onidpassertionerror::', e);
       },
-      onidpvalidationerror: options.onidpvalidationerror || function(e) {
+      onidpvalidationerror: options.rtc_handlers.onidpvalidationerror || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onidpvalidationerror::', e);
       },
-      onnegotiationneeded: options.onnegotiationneeded || function(e) {
+      onnegotiationneeded: options.rtc_handlers.onnegotiationneeded || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onnegotiationneeded::', e);
       },
-      onpeeridentity: options.onpeeridentity || function(e) {
+      onpeeridentity: options.rtc_handlers.onpeeridentity || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onpeeridentity::', e);
       },
-      onremovestream: options.onremovestream || function(e) {
+      onremovestream: options.rtc_handlers.onremovestream || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onremovestream::', e);
       },
-      onsignalstatechange: options.onsignalstatechange || function(e) {
+      onsignalstatechange: options.rtc_handlers.onsignalstatechange || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.rtc_handlers.onsignalstatechange::', e);
       }
     },
@@ -112,23 +116,22 @@ var PeerSock = function peerSock( options ) {
 
     // DC Handlers
     dc_handlers: {
-      onopen: options.onopen || function(e) {
-        console.log(this);
+      onopen: options.dc_handlers.onopen || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.dc_handlers.onopen::', e);
       },
-      onerror: options.onerror || function(e) {
+      onerror: options.dc_handlers.onerror || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.dc_handlers.onerror::', e);
       },
-      onmessage: options.onmessage || function(e) {
+      onmessage: options.dc_handlers.onmessage || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.dc_handlers.onmessage::', e);
       },
-      onclose: options.onclose || function(e) {
+      onclose: options.dc_handlers.onclose || function(e) {
         if (this.PeerSock.debug) console.log('PeerSock.dc_handlers.onclose::', e);
       }
     },
 
     // Signaling
-    signal: options.signal || {
+    signal: {
       socket: options.socket,
 
       /**
@@ -139,7 +142,7 @@ var PeerSock = function peerSock( options ) {
        * @param client_id {String}    The id of the sending client
        * @param message {Object}      The message object to send
        */
-      send: function( handler_id, peer_id, client_id, message ) {
+      send: options.signal.send || function( handler_id, peer_id, client_id, message ) {
         this.socket.emit('MessageToPeer', {
           handler_id: handler_id,
           peer_id: peer_id,
@@ -154,7 +157,7 @@ var PeerSock = function peerSock( options ) {
        * @param handler {String}      The name of the handler
        * @param callback {Function}   The callback to execute
        */
-      onmessage: function( handler, callback ) {
+      onmessage: options.signal.onmessage || function( handler, callback ) {
         this.socket.on(handler, function(message) {
           callback(message);
         })

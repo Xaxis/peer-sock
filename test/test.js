@@ -7,37 +7,39 @@
   // Socket is ready
   socket.on('ready', function( self ) {
 
-    // Create a PeerSock object
+    // STEP 1: Configure a new PeerSock object
     var PS = PeerSock({
       socket: socket,
       debug: false
     });
 
-    // Step 1:
-    // Initialize new peer connection w/ data channel
-    // onMessage is used to receive peer data and additionally send data back on the same channel
+    // STEP 2: Initialize new peer connection w/ data channel
     PS.newListeningChannel({
       client_id: self.client_id,
       channel_id: 'channel_1',
+
+      // Handle message from peer
       onMessage: function(c) {
         console.log(c.data);
 
-        // Send message back after receiving message
+        // Send a message back
         c.channel.send(JSON.stringify({
           msg: 'Hello Peer YOURSELF!'
         }));
       }
     });
-
-    // Listen for new peers (peer id is the peer's socket id)
+    
+    // Server notifies of new peers and sends their id
     socket.on('peer', function( peer ) {
       if (self.client_id != peer.peer_id) {
 
-        // EXAMPLE: Send first message to peer and listen for responses
+        // STEP 3: Begin communications
         PS.startListeningChannel({
           channel_id: 'channel_1',
           client_id: self.client_id,
           peer_id: peer.peer_id,
+
+          // Send first message to peer
           send: function(c) {
 
             // Send first message to peer
@@ -45,6 +47,8 @@
               msg: 'Hello Peer!'
             }));
           },
+
+          // Handle response from peer
           onMessage: function(c) {
             console.log(c.data);
           }
