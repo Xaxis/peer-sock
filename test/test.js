@@ -13,6 +13,7 @@
       debug: false
     });
 
+    // Step 1:
     // Initialize new peer connection w/ data channel
     // onMessage is used to receive peer data and additionally send data back on the same channel
     PS.newListeningChannel({
@@ -28,7 +29,7 @@
       }
     });
 
-    // Listen for new peers
+    // Listen for new peers (peer id is the peer's socket id)
     socket.on('peer', function( peer ) {
       if (self.client_id != peer.peer_id) {
 
@@ -48,6 +49,7 @@
             console.log(c.data);
           }
         });
+
       }
     });
   });
