@@ -4,8 +4,8 @@
 
 WebRTC and socket.io framework for easily managing p2p data channel communications.
 
-Simply put, peer-sock allows you to make peer-to-peer data channel communications over the web. Using WebRTC and 
-[socket.io](http://http://socket.io/) you can build your own p2p app rapidly.
+Simply put, peer-sock allows you to make peer-to-peer data channel communications over the web using WebRTC and 
+[socket.io](http://http://socket.io/).
 
 ## Author
 
@@ -19,7 +19,7 @@ Wil Neeley ( [@wilneeley](http://twitter.com/wilneeley) / [github.com](https://g
 4. Run `nodemon` or `node server.js`
 5. Go to your local web server's path where peer-sock is located (e.g. `localhost/peer-sock/test/test.html`).
 6. Open your browsers console log and open up another instance of `test.html`.
-7. Modify away to meet your projects needs.
+7. Modify away to meet your project's data channel needs.
 
 It's worth noting that this implementation of peer-sock uses socket.io for its signaling channel (the bit that 
 exchanges communication details) before forming the peer-to-peer connection. `peer-sock.js` allows its signaling channel
@@ -27,8 +27,8 @@ implementation to be fully overriden.
 
 ### Usage
 
-While `peer-sock` contains a number of useful methods for forming and managing WebRTC connections their are two methods
-that act as the data channel "sugar".
+While peer-sock contains a number of useful methods for forming and managing WebRTC connections their are two methods in
+particular that act as the data channel "sugar". 
 
 #### Step 1
 
@@ -36,6 +36,10 @@ To get started building a p2p data channel communication you first create a new 
 parameter is the only required configuration option. This is the socket resource created by socket.io.
 
 ```javascript
+// Create socket.io resource
+var socket = io.connect('//localhost:9222');
+
+// Configure new PeerSock object
 var PS = PeerSock({
   socket: socket
 });
