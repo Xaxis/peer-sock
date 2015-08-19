@@ -96,7 +96,7 @@ PS.startListeningChannel({
 ```
 
 The `startListeningChannel` method requires the `channel_id` or name of the data channel to use, the peer and client
-socket ids (provided by socket.io and our server.js backend), and a couple of callbacks to get started.
+socket ids (provided by socket.io and our server.js backend), and a couple of callbacks to start communicating.
 
 The `send` callback is where we send any data we want to the peer we're connecting to (though you don't have to send 
 anything to connect and form the data channel). The `onMessage` callback defines what we do when/if the peer responds
