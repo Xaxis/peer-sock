@@ -1,5 +1,7 @@
 # peer-sock
 
+Version 1.0.0
+
 ## Summary
 
 WebRTC and socket.io framework for easily managing p2p data channel communications.
