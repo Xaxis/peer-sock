@@ -76,8 +76,8 @@ And last we start communicating over the data channel.
 ```javascript
 PS.startListeningChannel({
   channel_id: 'channel_1',
-  client_id: self.client_id,
-  peer_id: peer.peer_id,
+  client_id: self.client_id,        // Client socket id from server    
+  peer_id: peer.peer_id,            // Peer socket id from server    
 
   // Send message to peer
   send: function(c) {
