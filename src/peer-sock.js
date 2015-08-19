@@ -307,7 +307,7 @@ var PeerSock = function peerSock( options ) {
      * from peer.
      *
      * @param options {Object}
-     * @param options.channel_id {String}       Identity string (arbitrary channel name)
+     * @param options.channel_id {String}         Identity string (arbitrary channel name)
      * @param options.onMessage {Function}        Callback to execute on data channel's onmessage event
      */
     newListeningChannel: function( options ) {

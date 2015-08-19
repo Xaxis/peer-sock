@@ -102,6 +102,10 @@ The `send` callback is where we send any data we want to the peer we're connecti
 anything to connect and form the data channel). The `onMessage` callback defines what we do when/if the peer responds
 over a given data channel.
 
+### Advanced Usage
+
+Coming soon.
+
 ## Examples
 
 See `test/test.html`.
