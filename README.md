@@ -79,17 +79,38 @@ And last we start communicating over the data channel.
 PS.startListeningChannel({
   channel_id: 'channel_1',
   client_id: self.client_id,        // Client socket id from server    
-  peer_id: peer.peer_id,            // Peer socket id from server    
+  peer_id: peer.peer_id             // Peer socket id from server
+});
+```
+
+The `startListeningChannel` method requires the `channel_id` or name of the data channel to use and the peer and client
+socket ids (provided by socket.io and our server.js backend). Calling this method will establish a peer connection and
+build the data channel. Once the channel is created you can send data to a peer using the `sendOnChannel` method.
+
+```javascript
+setTimeout(function() {
+  PS.sendOnChannel('channel_1', JSON.stringify({msg: 'Hello Peer!'}));
+}, 2000);
+```
+
+Note that sending with `sendOnChannel` requires that the channel has been initialized and has a `readyState` property
+value of `open`. A better way to send on the data channel with a guarantee that it's ready is to do the following:
+
+```javascript
+PS.startListeningChannel({
+  channel_id: 'channel_1',
+  client_id: self.client_id,
+  peer_id: peer.peer_id
 
   // Send message to peer
-  send: function(c) {
-
+  onOpen: function(c) {
+  
     // Send first message to peer
     c.channel.send(JSON.stringify({
       msg: 'Hello Peer!'
     }));
   },
-
+  
   // Handle response from peer
   onMessage: function(c) {
     console.log(c.data);
@@ -97,12 +118,9 @@ PS.startListeningChannel({
 });
 ```
 
-The `startListeningChannel` method requires the `channel_id` or name of the data channel to use, the peer and client
-socket ids (provided by socket.io and our server.js backend), and a couple of callbacks to start communicating.
-
-The `send` callback is where we send any data we want to the peer we're connecting to (though you don't have to send 
-anything to connect and form the data channel). The `onMessage` callback defines what we do when/if the peer responds
-over a given data channel.
+The `onOpen` callback is where we send any data we want to the peer we're connecting to. The `onMessage` callback 
+defines what we do when/if the peer responds over a given data channel. The `startListeningChannel` method can 
+additionally be passed `onClose` and `onError` event handlers.
 
 ### Advanced Usage
 

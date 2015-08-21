@@ -231,16 +231,18 @@ var PeerSock = function peerSock( options ) {
         }(),
 
         // Create data channel and store reference
-        channel         = this.channels[options.channel_id] = pc.createDataChannel(id, this.dc_config);
+        channel         = this.channels[options.channel_id] = {
+          channel: pc.createDataChannel(id, this.dc_config)
+        };
 
       // Extend default handlers
       for (var handler in this.dc_handlers) {
         dc_handlers[handler] = handlers[handler] || this.dc_handlers[handler];
-        channel[handler] = dc_handlers[handler];
+        channel.channel[handler] = dc_handlers[handler];
       }
 
       // Add PeerSock reference to data channel object
-      channel.PeerSock = this;
+      channel.channel.PeerSock = this;
 
       return this.getDataChannel(options.channel_id);
     },
@@ -303,8 +305,7 @@ var PeerSock = function peerSock( options ) {
     },
 
     /**
-     * Handles connection negotiation and creates a new connection/data channel that defines how to respond to a message
-     * from peer.
+     * Handles connection negotiation and creates a new connection while defining a data channel event listener.
      *
      * @param options {Object}
      * @param options.channel_id {String}         Identity string (arbitrary channel name)
@@ -323,16 +324,10 @@ var PeerSock = function peerSock( options ) {
         // Respond to offers
         if (sdp.type == 'offer') {
 
-          // Build a peer connection w/ new data channel
+          // Build a peer connection w/ dc listener
           self.newPeerConnection({
             rtc_handlers: {
               ondatachannel: function(e) {
-
-                // Create new data channel
-                self.newDataChannel({
-                  channel: e.channel,
-                  channel_id: e.channel.label
-                });
 
                 // Attach channel message handler
                 e.channel.onmessage = function(o) {
@@ -340,8 +335,7 @@ var PeerSock = function peerSock( options ) {
                     options.onMessage.call(this, {
                       channel: e.channel,
                       message: message,
-                      data: o.data,
-                      peer_id: message.peer_id
+                      data: o.data
                     });
                   }
                 };
@@ -349,9 +343,11 @@ var PeerSock = function peerSock( options ) {
             }
           });
 
-          // Send peer answer
+          // Reference socket ids (reverse for inverse signaling)
           self.client_id = message.peer_id;
           self.peer_id = message.client_id;
+
+          // Send peer answer
           self.answerPeerOffer(self.pc, sdp, function(answer) {
             self.signal.send(options.channel_id, message.peer_id, message.client_id, answer);
           });
@@ -377,11 +373,7 @@ var PeerSock = function peerSock( options ) {
       var
         self        = this,
         init        = this.pc ? true : false,
-        identity    = function() {},
-        onOpen      = options.onOpen || options.send || identity,
-        onMessage   = options.onMessage || identity,
-        onClose     = options.onClose || identity,
-        onError     = options.onError || identity;
+        identity    = function() {};
 
       // Create peer connection
       if (!init) this.newPeerConnection();
@@ -392,31 +384,27 @@ var PeerSock = function peerSock( options ) {
         connection: self.pc,
         dc_handlers: {
           onopen: function(e) {
-            onOpen.call(this, {
-              channel: self.channels[options.channel_id],
-              peer_id: options.peer_id,
+            (options.onOpen || identity).call(this, {
+              channel: self.getDataChannel(options.channel_id).channel,
               event: e
             });
           },
           onmessage: function(e) {
-            onMessage.call(this, {
-              channel: self.channels[options.channel_id],
-              peer_id: options.peer_id,
+            (options.onMessage || identity).call(this, {
+              channel: self.getDataChannel(options.channel_id).channel,
               data: e.data,
               event: e
             });
           },
           onclose: function(e) {
-            onClose.call(this, {
-              channel: self.channels[options.channel_id],
-              peer_id: options.peer_id,
+            (options.onClose || identity).call(this, {
+              channel: self.getDataChannel(options.channel_id).channel,
               event: e
             });
           },
           onerror: function(e) {
-            onError.call(this, {
-              channel: self.channels[options.channel_id],
-              peer_id: options.peer_id,
+            (options.onError || identity).call(this, {
+              channel: self.getDataChannel(options.channel_id).channel,
               event: e
             });
           }
@@ -426,10 +414,27 @@ var PeerSock = function peerSock( options ) {
       // Send connection offer to peer & reference socket ids
       this.client_id = options.client_id;
       this.peer_id = options.peer_id;
+
+      // Send peer offer
       if (!init) {
         this.createClientOffer(this.pc, function(offer) {
           self.signal.send(options.channel_id, options.peer_id, options.client_id, offer);
         });
+      }
+    },
+
+    /**
+     * Sends data on a previously established data channel
+     * @param channel_id {String}       The id of the channel to send on
+     * @param data {Data}               The data to send to peer
+     */
+    sendOnChannel: function( channel_id, data ) {
+      var
+        channel       = this.getDataChannel(channel_id).channel;
+
+      // Send data on open channel
+      if (channel.readyState == 'open') {
+        channel.send(data);
       }
     }
   });

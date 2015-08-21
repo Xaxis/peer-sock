@@ -4,11 +4,14 @@
   var socket = io.connect('//localhost:9222');
   socket.emit('register', {ready: true});
 
+  // PeerSocket object placeholder
+  var PS = null;
+
   // Socket is ready
   socket.on('ready', function( self ) {
 
     // STEP 1: Configure a new PeerSock object
-    var PS = PeerSock({
+    PS = PeerSock({
       socket: socket,
       debug: false
     });
@@ -23,7 +26,7 @@
 
         // Send a message back
         c.channel.send(JSON.stringify({
-          msg: 'Hello YOURSELF!'
+          msg: 'Right back at ya!'
         }));
       }
     });
@@ -36,10 +39,10 @@
         PS.startListeningChannel({
           channel_id: 'channel_1',
           client_id: self.client_id,
-          peer_id: peer.peer_id,
+          peer_id: peer.peer_id
 
           // Send message to peer
-          send: function(c) {
+          onOpen: function(c) {
 
             // Send first message to peer
             c.channel.send(JSON.stringify({
@@ -52,6 +55,11 @@
             console.log(c.data);
           }
         });
+
+        // Send another message a few seconds later
+        setTimeout(function() {
+          PS.sendOnChannel('channel_1', JSON.stringify({msg: 'test'}));
+        }, 2000);
 
       }
     });
