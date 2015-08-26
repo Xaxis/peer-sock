@@ -66,18 +66,20 @@ var PeerSock = function peerSock( options ) {
           self          = this,
           candidate     = e.candidate,
           client_id     = this.PeerSock.client_id,
-          peer_id       = this.PeerSock.peer_id;
+          peer_id       = this.PeerSock.peer_id,
+          signal_id     = 'PeerSock_IceCandidate' + client_id + peer_id;
 
         // Listen for and then set ice candidates from peer
-        this.PeerSock.signal.onmessage('PeerSock_IceCandidate', function(candidateMessage) {
+        this.PeerSock.signal.onmessage(signal_id, function(candidateMessage) {
           self.PeerSock.pc.addIceCandidate(new self.PeerSock.IceCandidate(candidateMessage.message));
         });
 
         // Send ice candidate to peer
-        this.PeerSock.signal.send('PeerSock_IceCandidate', peer_id, client_id, {
+        this.PeerSock.signal.send(signal_id, peer_id, client_id, {
           candidate: candidate.candidate,
           sdpMLineIndex: candidate.sdpMLineIndex
         });
+
 
         // Nullify handler
         this.onicecandidate = null;
@@ -220,7 +222,7 @@ var PeerSock = function peerSock( options ) {
         handlers        = options.dc_handlers || {},
         dc_handlers     = {},
 
-        // Generate unique channel id
+      // Generate unique channel id
         id              = function() {
           var id_gen = Math.floor(Math.random() * (10000 - 1));
           if (id_gen in self.channels) {
@@ -230,7 +232,7 @@ var PeerSock = function peerSock( options ) {
           }
         }(),
 
-        // Create data channel and store reference
+      // Create data channel and store reference
         channel         = this.channels[options.channel_id] = {
           channel: pc.createDataChannel(id, this.dc_config)
         };

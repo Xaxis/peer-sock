@@ -6,8 +6,8 @@ Version 1.0.0
 
 WebRTC and socket.io framework for easily managing p2p data channel communications.
 
-Simply put, peer-sock allows you to make peer-to-peer data channel communications over the web using WebRTC and 
-[socket.io](http://http://socket.io/).
+Simply put, peer-sock allows you to make peer-to-peer data channel communications over the web using [WebRTC](http://www.w3.org/TR/webrtc/)
+and [socket.io](http://http://socket.io/).
 
 ## Author
 
