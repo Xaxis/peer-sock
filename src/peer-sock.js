@@ -331,6 +331,11 @@ var PeerSock = function peerSock( options ) {
             rtc_handlers: {
               ondatachannel: function(e) {
 
+                // Reference channel in channel object
+                self.channels[options.channel_id] = {
+                  channel: e.channel
+                };
+
                 // Attach channel message handler
                 e.channel.onmessage = function(o) {
                   if (options.onMessage) {
